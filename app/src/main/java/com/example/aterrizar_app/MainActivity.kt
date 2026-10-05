@@ -31,6 +31,15 @@ import androidx.compose.ui.unit.sp
 import com.example.aterrizar_app.ui.theme.AterrizarAppTheme
 import com.example.aterrizar_app.ui.theme.AzulOceano
 import com.example.aterrizar_app.ui.theme.Turquesa
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +66,10 @@ fun AterrizarApp() {
             .verticalScroll(rememberScrollState())
     ) {
         Header()
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Buscador()
     }
 }
 
@@ -89,6 +102,35 @@ fun Header() {
             )
         }
     }
+}
+
+@Composable
+fun Buscador() {
+    var texto by remember { mutableStateOf("") }
+
+    OutlinedTextField(
+        value = texto,
+        onValueChange = { texto = it },
+        placeholder = { Text("¿A dónde quieres ir?") },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Buscar",
+                tint = Turquesa
+            )
+        },
+        singleLine = true,
+        shape = RoundedCornerShape(24.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            focusedBorderColor = Turquesa,
+            unfocusedBorderColor = Color(0xFFE0D6C6)
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+    )
 }
 
 @Preview(showBackground = true)
