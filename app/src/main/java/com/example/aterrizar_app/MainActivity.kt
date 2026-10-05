@@ -55,6 +55,19 @@ import com.example.aterrizar_app.ui.theme.OcreHistoria
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -111,6 +124,8 @@ fun AterrizarApp() {
     }
 }
 
+val FuenteLogo = FontFamily(Font(R.font.fredoka_bold, FontWeight.Bold))
+
 @Composable
 fun Header() {
     Box(
@@ -122,22 +137,94 @@ fun Header() {
                     colors = listOf(AzulOceano, Turquesa)
                 )
             )
-            .statusBarsPadding()
-            .padding(horizontal = 24.dp, vertical = 32.dp)
     ) {
-        Column {
+        // Círculos decorativos translúcidos
+        Box(
+            modifier = Modifier
+                .size(160.dp)
+                .align(Alignment.TopEnd)
+                .offset(x = 50.dp, y = (-40).dp)
+                .background(Color.White.copy(alpha = 0.10f), CircleShape)
+        )
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .align(Alignment.BottomStart)
+                .offset(x = (-30).dp, y = 30.dp)
+                .background(Color.White.copy(alpha = 0.08f), CircleShape)
+        )
+
+        Column(
+            modifier = Modifier
+                .statusBarsPadding()
+                .padding(horizontal = 24.dp, vertical = 32.dp)
+        ) {
             Text(
-                text = "Aterrizar CO ✈️",
+                text = "Aterrizar CO",
                 color = Color.White,
-                fontSize = 36.sp,
-                fontWeight = FontWeight.ExtraBold
+                fontFamily = FuenteLogo,
+                fontWeight = FontWeight.Bold,
+                fontSize = 44.sp,
+                letterSpacing = 1.sp
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "¡¡Tu próximo destino te espera!!",
-                color = Color.White.copy(alpha = 0.9f),
-                fontSize = 16.sp
+
+            EstelaDeVuelo()
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = Color.White.copy(alpha = 0.2f)
+            ) {
+                Text(
+                    text = "Tu próximo destino te espera",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun EstelaDeVuelo() {
+    Canvas(
+        modifier = Modifier
+            .width(220.dp)
+            .height(36.dp)
+    ) {
+        val finX = size.width * 0.9f
+        val finY = size.height * 0.2f
+
+        // Línea punteada curva
+        val trayectoria = Path().apply {
+            moveTo(0f, size.height * 0.85f)
+            quadraticBezierTo(
+                size.width * 0.5f, size.height * -0.3f,
+                finX, finY
             )
+        }
+        drawPath(
+            path = trayectoria,
+            color = Color.White,
+            style = Stroke(
+                width = 6f,
+                cap = StrokeCap.Round,
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(18f, 16f))
+            )
+        )
+
+        // Avión de papel blanco al final de la línea
+        val avion = Path().apply {
+            moveTo(finX + 44f, finY)
+            lineTo(finX - 24f, finY - 26f)
+            lineTo(finX - 10f, finY)
+            lineTo(finX - 24f, finY + 26f)
+            close()
+        }
+        rotate(degrees = -20f, pivot = Offset(finX, finY)) {
+            drawPath(path = avion, color = Color.White)
         }
     }
 }
