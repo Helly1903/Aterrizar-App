@@ -52,6 +52,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.example.aterrizar_app.ui.theme.NaranjaAtardecer
 import com.example.aterrizar_app.ui.theme.OcreHistoria
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,6 +85,10 @@ fun AterrizarApp() {
         Spacer(modifier = Modifier.height(20.dp))
 
         Buscador()
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Categorias()
 
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -162,6 +169,39 @@ fun Buscador() {
             .fillMaxWidth()
             .padding(horizontal = 24.dp)
     )
+}
+
+@Composable
+fun Categorias() {
+    val categorias = listOf("Todos", "🏖️ Playas", "🏛️ Historia", "🏔️ Montaña", "🌆 Ciudades")
+    var seleccionada by remember { mutableStateOf("Todos") }
+
+    Row(
+        modifier = Modifier
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        for (categoria in categorias) {
+            val activa = categoria == seleccionada
+            Text(
+                text = categoria,
+                color = if (activa) Color.White else AzulOceano,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(if (activa) AzulOceano else Color.White)
+                    .border(
+                        width = 1.dp,
+                        color = if (activa) AzulOceano else Color(0xFFE0D6C6),
+                        shape = RoundedCornerShape(50)
+                    )
+                    .clickable { seleccionada = categoria }
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            )
+        }
+    }
 }
 
 @Composable
