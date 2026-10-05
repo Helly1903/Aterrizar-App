@@ -95,31 +95,12 @@ fun AterrizarApp() {
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        DestinoCard(
-            nombre = "Cartagena",
-            pais = "Colombia",
-            descripcion = "Murallas históricas, calles coloridas y playas del Caribe.",
-            duracion = "5 días / 4 noches",
-            precio = "$1.850.000",
-            categoria = "🏛️ Historia",
-            colorCategoria = OcreHistoria,
-            imagen = R.drawable.cartagena
-        )
+        for (destino in destinos) {
+            DestinoCard(destino = destino)
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        DestinoCard(
-            nombre = "Cancún",
-            pais = "México",
-            descripcion = "Arena blanca, mar turquesa y vida nocturna inolvidable.",
-            duracion = "6 días / 5 noches",
-            precio = "$3.200.000",
-            categoria = "🏖️ Playa",
-            colorCategoria = Turquesa,
-            imagen = R.drawable.cancun
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
@@ -184,16 +165,7 @@ fun Buscador() {
 }
 
 @Composable
-fun DestinoCard(
-    nombre: String,
-    pais: String,
-    descripcion: String,
-    duracion: String,
-    precio: String,
-    categoria: String,
-    colorCategoria: Color,
-    imagen: Int
-) {
+fun DestinoCard(destino: Destino) {
     Card(
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -208,20 +180,20 @@ fun DestinoCard(
                 .height(200.dp)
         ) {
             Image(
-                painter = painterResource(id = imagen),
-                contentDescription = nombre,
+                painter = painterResource(id = destino.imagen),
+                contentDescription = destino.nombre,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.fillMaxSize()
             )
             Surface(
                 shape = RoundedCornerShape(50),
-                color = colorCategoria,
+                color = destino.colorCategoria,
                 modifier = Modifier
                     .align(Alignment.TopStart)
                     .padding(12.dp)
             ) {
                 Text(
-                    text = categoria,
+                    text = destino.categoria,
                     color = Color.White,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
@@ -232,13 +204,13 @@ fun DestinoCard(
 
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = nombre,
+                text = destino.nombre,
                 color = AzulOceano,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = pais,
+                text = destino.pais,
                 color = Turquesa,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium
@@ -247,7 +219,7 @@ fun DestinoCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = descripcion,
+                text = destino.descripcion,
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
             )
@@ -255,7 +227,7 @@ fun DestinoCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "🕒 $duracion",
+                text = "🕒 ${destino.duracion}",
                 fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
@@ -268,7 +240,7 @@ fun DestinoCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = precio,
+                    text = destino.precio,
                     color = NaranjaAtardecer,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.ExtraBold
