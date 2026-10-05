@@ -40,6 +40,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.example.aterrizar_app.ui.theme.NaranjaAtardecer
+import com.example.aterrizar_app.ui.theme.OcreHistoria
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,6 +82,44 @@ fun AterrizarApp() {
         Spacer(modifier = Modifier.height(20.dp))
 
         Buscador()
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Destinos destacados",
+            color = AzulOceano,
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(horizontal = 24.dp)
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        DestinoCard(
+            nombre = "Cartagena",
+            pais = "Colombia",
+            descripcion = "Murallas históricas, calles coloridas y playas del Caribe.",
+            duracion = "5 días / 4 noches",
+            precio = "$1.850.000",
+            categoria = "🏛️ Historia",
+            colorCategoria = OcreHistoria,
+            imagen = R.drawable.cartagena
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        DestinoCard(
+            nombre = "Cancún",
+            pais = "México",
+            descripcion = "Arena blanca, mar turquesa y vida nocturna inolvidable.",
+            duracion = "6 días / 5 noches",
+            precio = "$3.200.000",
+            categoria = "🏖️ Playa",
+            colorCategoria = Turquesa,
+            imagen = R.drawable.cancun
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
@@ -131,6 +181,109 @@ fun Buscador() {
             .fillMaxWidth()
             .padding(horizontal = 24.dp)
     )
+}
+
+@Composable
+fun DestinoCard(
+    nombre: String,
+    pais: String,
+    descripcion: String,
+    duracion: String,
+    precio: String,
+    categoria: String,
+    colorCategoria: Color,
+    imagen: Int
+) {
+    Card(
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp)
+        ) {
+            Image(
+                painter = painterResource(id = imagen),
+                contentDescription = nombre,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = colorCategoria,
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = categoria,
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+            }
+        }
+
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = nombre,
+                color = AzulOceano,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = pais,
+                color = Turquesa,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = descripcion,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "🕒 $duracion",
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = precio,
+                    color = NaranjaAtardecer,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Button(
+                    onClick = {},
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = NaranjaAtardecer
+                    )
+                ) {
+                    Text("Reservar")
+                }
+            }
+        }
+    }
 }
 
 @Preview(showBackground = true)
