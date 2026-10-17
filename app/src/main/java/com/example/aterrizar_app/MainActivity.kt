@@ -129,7 +129,10 @@ fun AterrizarApp() {
                 )
             }
             composable(Rutas.MIS_VIAJES) {
-                MisViajesScreen()
+                MisViajesScreen(
+                    reservas = reservas,
+                    onCancelar = { id -> reservas = reservas.filter { it.id != id } }
+                )
             }
             composable(
                 route = Rutas.RESERVAR,
