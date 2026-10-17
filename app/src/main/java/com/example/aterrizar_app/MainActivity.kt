@@ -15,6 +15,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
@@ -55,6 +58,13 @@ fun AterrizarApp() {
     val entradaActual by navController.currentBackStackEntryAsState()
     val rutaActual = entradaActual?.destination?.route
 
+    // Estado compartido: ids de los destinos marcados como favoritos
+    var favoritos by remember { mutableStateOf<Set<Int>>(emptySet()) }
+
+    fun alternarFavorito(id: Int) {
+        favoritos = if (id in favoritos) favoritos - id else favoritos + id
+    }
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
@@ -72,7 +82,13 @@ fun AterrizarApp() {
                             }
                         },
                         icon = { Text(text = item.emoji, fontSize = 22.sp) },
-                        label = { Text(text = item.etiqueta) },
+                        label = {
+                            val contador =
+                                if (item.ruta == Rutas.FAVORITOS && favoritos.isNotEmpty()) {
+                                    " (${favoritos.size})"
+                                } else ""
+                            Text(text = item.etiqueta + contador)
+                        },
                         colors = NavigationBarItemDefaults.colors(
                             selectedTextColor = AzulOceano,
                             indicatorColor = Turquesa.copy(alpha = 0.2f)
@@ -87,9 +103,21 @@ fun AterrizarApp() {
             startDestination = Rutas.INICIO,
             modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
         ) {
-            composable(Rutas.INICIO) { InicioScreen() }
-            composable(Rutas.FAVORITOS) { FavoritosScreen() }
-            composable(Rutas.MIS_VIAJES) { MisViajesScreen() }
+            composable(Rutas.INICIO) {
+                InicioScreen(
+                    favoritos = favoritos,
+                    onAlternarFavorito = { alternarFavorito(it) }
+                )
+            }
+            composable(Rutas.FAVORITOS) {
+                FavoritosScreen(
+                    favoritos = favoritos,
+                    onAlternarFavorito = { alternarFavorito(it) }
+                )
+            }
+            composable(Rutas.MIS_VIAJES) {
+                MisViajesScreen()
+            }
         }
     }
 }

@@ -34,7 +34,10 @@ private fun String.sinTildes(): String =
     Normalizer.normalize(this, Normalizer.Form.NFD).replace(Regex("\\p{M}"), "")
 
 @Composable
-fun InicioScreen() {
+fun InicioScreen(
+    favoritos: Set<Int>,
+    onAlternarFavorito: (Int) -> Unit
+) {
     var texto by remember { mutableStateOf("") }
     var categoriaSeleccionada by remember { mutableStateOf<Categoria?>(null) }
 
@@ -87,7 +90,11 @@ fun InicioScreen() {
             }
         } else {
             items(destinosFiltrados, key = { it.id }) { destino ->
-                DestinoCard(destino = destino)
+                DestinoCard(
+                    destino = destino,
+                    esFavorito = destino.id in favoritos,
+                    onFavoritoClick = { onAlternarFavorito(destino.id) }
+                )
             }
         }
     }
@@ -97,6 +104,9 @@ fun InicioScreen() {
 @Composable
 fun InicioScreenPreview() {
     AterrizarAppTheme {
-        InicioScreen()
+        InicioScreen(
+            favoritos = emptySet(),
+            onAlternarFavorito = {}
+        )
     }
 }

@@ -14,8 +14,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -116,7 +118,11 @@ fun CategoriasRow(seleccionada: Categoria?, onSeleccion: (Categoria?) -> Unit) {
 }
 
 @Composable
-fun DestinoCard(destino: Destino) {
+fun DestinoCard(
+    destino: Destino,
+    esFavorito: Boolean,
+    onFavoritoClick: () -> Unit
+) {
     Card(
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -149,6 +155,23 @@ fun DestinoCard(destino: Destino) {
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                )
+            }
+
+            // Botón corazón (favorito)
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp)
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.9f))
+                    .clickable { onFavoritoClick() }
+            ) {
+                Text(
+                    text = if (esFavorito) "❤️" else "🤍",
+                    fontSize = 20.sp
                 )
             }
         }
