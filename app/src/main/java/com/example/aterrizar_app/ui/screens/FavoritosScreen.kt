@@ -21,7 +21,8 @@ import com.example.aterrizar_app.ui.theme.AzulOceano
 @Composable
 fun FavoritosScreen(
     favoritos: Set<Int>,
-    onAlternarFavorito: (Int) -> Unit
+    onAlternarFavorito: (Int) -> Unit,
+    onReservar: (Int) -> Unit
 ) {
     val destinosFavoritos = destinos.filter { it.id in favoritos }
 
@@ -52,7 +53,8 @@ fun FavoritosScreen(
                 DestinoCard(
                     destino = destino,
                     esFavorito = true,
-                    onFavoritoClick = { onAlternarFavorito(destino.id) }
+                    onFavoritoClick = { onAlternarFavorito(destino.id) },
+                    onReservarClick = { onReservar(destino.id) }
                 )
             }
         }

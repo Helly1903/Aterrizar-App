@@ -36,7 +36,8 @@ private fun String.sinTildes(): String =
 @Composable
 fun InicioScreen(
     favoritos: Set<Int>,
-    onAlternarFavorito: (Int) -> Unit
+    onAlternarFavorito: (Int) -> Unit,
+    onReservar: (Int) -> Unit
 ) {
     var texto by remember { mutableStateOf("") }
     var categoriaSeleccionada by remember { mutableStateOf<Categoria?>(null) }
@@ -93,7 +94,8 @@ fun InicioScreen(
                 DestinoCard(
                     destino = destino,
                     esFavorito = destino.id in favoritos,
-                    onFavoritoClick = { onAlternarFavorito(destino.id) }
+                    onFavoritoClick = { onAlternarFavorito(destino.id) },
+                    onReservarClick = { onReservar(destino.id) }
                 )
             }
         }
@@ -106,7 +108,8 @@ fun InicioScreenPreview() {
     AterrizarAppTheme {
         InicioScreen(
             favoritos = emptySet(),
-            onAlternarFavorito = {}
+            onAlternarFavorito = {},
+            onReservar = {}
         )
     }
 }

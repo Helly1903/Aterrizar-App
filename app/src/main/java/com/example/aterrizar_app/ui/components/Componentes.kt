@@ -121,7 +121,8 @@ fun CategoriasRow(seleccionada: Categoria?, onSeleccion: (Categoria?) -> Unit) {
 fun DestinoCard(
     destino: Destino,
     esFavorito: Boolean,
-    onFavoritoClick: () -> Unit
+    onFavoritoClick: () -> Unit,
+    onReservarClick: () -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(24.dp),
@@ -220,7 +221,7 @@ fun DestinoCard(
                     fontWeight = FontWeight.ExtraBold
                 )
                 Button(
-                    onClick = {},
+                    onClick = onReservarClick,
                     colors = ButtonDefaults.buttonColors(containerColor = NaranjaAtardecer)
                 ) {
                     Text("Reservar")
