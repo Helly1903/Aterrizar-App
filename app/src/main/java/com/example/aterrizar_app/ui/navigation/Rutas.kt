@@ -4,6 +4,11 @@ object Rutas {
     const val INICIO = "inicio"
     const val FAVORITOS = "favoritos"
     const val MIS_VIAJES = "mis_viajes"
+
+    // Ruta con argumento: {destinoId} se reemplaza por el id del destino
+    const val RESERVAR = "reservar/{destinoId}"
+
+    fun reservarConId(destinoId: Int) = "reservar/$destinoId"
 }
 
 data class ItemBarra(
