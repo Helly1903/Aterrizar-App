@@ -10,3 +10,9 @@ val OcreHistoria = Color(0xFFC9923E)
 val TextoOscuro = Color(0xFF1F2933)
 val VerdeMontana = Color(0xFF3E8E5A)
 val MoradoCiudad = Color(0xFF8E5BD0)
+
+val RojoCancelar = Color(0xFFC62828)
+
+val BordeArena = Color(0xFFE0D6C6)
+
+val GrisDeshabilitado = Color(0xFFD5D0C8)

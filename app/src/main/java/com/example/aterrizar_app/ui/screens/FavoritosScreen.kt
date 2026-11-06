@@ -13,7 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.aterrizar_app.destinos
+import com.example.aterrizar_app.data.destinos
 import com.example.aterrizar_app.ui.components.DestinoCard
 import com.example.aterrizar_app.ui.components.EstadoVacio
 import com.example.aterrizar_app.ui.theme.AzulOceano

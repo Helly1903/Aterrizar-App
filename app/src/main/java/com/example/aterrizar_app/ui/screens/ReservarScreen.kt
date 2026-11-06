@@ -26,7 +26,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,17 +44,21 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.aterrizar_app.Destino
-import com.example.aterrizar_app.Plan
-import com.example.aterrizar_app.calcularCotizacion
-import com.example.aterrizar_app.destinos
-import com.example.aterrizar_app.formatoPrecio
+import com.example.aterrizar_app.data.destinos
+import com.example.aterrizar_app.model.Destino
+import com.example.aterrizar_app.model.Plan
 import com.example.aterrizar_app.ui.components.CategoriaChip
+import com.example.aterrizar_app.ui.components.ContadorViajeros
+import com.example.aterrizar_app.ui.components.FilaResumen
+import com.example.aterrizar_app.ui.components.TituloSeccion
+import com.example.aterrizar_app.ui.components.coloresCampo
 import com.example.aterrizar_app.ui.theme.AterrizarAppTheme
 import com.example.aterrizar_app.ui.theme.AzulOceano
 import com.example.aterrizar_app.ui.theme.NaranjaAtardecer
 import com.example.aterrizar_app.ui.theme.Turquesa
 import com.example.aterrizar_app.ui.theme.VerdeMontana
+import com.example.aterrizar_app.util.calcularCotizacion
+import com.example.aterrizar_app.util.formatoPrecio
 
 private val correoRegex = Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
 
@@ -65,19 +68,16 @@ fun ReservarScreen(
     onVolver: () -> Unit,
     onConfirmar: (String, String, Int, Int, Plan, Int) -> Unit
 ) {
-    // Estado del formulario
     var nombre by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
     var adultos by remember { mutableIntStateOf(1) }
     var ninos by remember { mutableIntStateOf(0) }
     var plan by remember { mutableStateOf(Plan.BASICO) }
 
-    // Validaciones
     val nombreValido = nombre.trim().length >= 3
     val correoValido = correoRegex.matches(correo.trim())
     val formularioValido = nombreValido && correoValido
 
-    // Se recalcula cada vez que cambia plan, adultos o niños
     val cotizacion = calcularCotizacion(destino, plan, adultos, ninos)
 
     Column(
@@ -86,7 +86,6 @@ fun ReservarScreen(
             .imePadding()
             .verticalScroll(rememberScrollState())
     ) {
-        // Encabezado: imagen con botón de volver encima (Box)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -116,8 +115,9 @@ fun ReservarScreen(
                 )
             }
         }
-
-        Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
+        Column(
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
+        ) {
             Text(
                 text = destino.nombre,
                 color = AzulOceano,
@@ -132,14 +132,12 @@ fun ReservarScreen(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "${destino.precioTexto} por persona · ${destino.duracion}",
+                text = "${destino.precioTexto} por persona · 📅 ${destino.duracion}",
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 fontSize = 14.sp
             )
 
-            // ---- Datos del titular ----
             TituloSeccion("Datos del titular")
-
             OutlinedTextField(
                 value = nombre,
                 onValueChange = { nombre = it },
@@ -155,9 +153,7 @@ fun ReservarScreen(
                 colors = coloresCampo(),
                 modifier = Modifier.fillMaxWidth()
             )
-
             Spacer(modifier = Modifier.height(4.dp))
-
             OutlinedTextField(
                 value = correo,
                 onValueChange = { correo = it },
@@ -175,9 +171,7 @@ fun ReservarScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // ---- Viajeros ----
             TituloSeccion("Viajeros")
-
             ContadorViajeros(
                 etiqueta = "Adultos",
                 detalle = "Precio completo",
@@ -187,12 +181,10 @@ fun ReservarScreen(
                 onMenos = { adultos-- },
                 onMas = { adultos++ }
             )
-
             Spacer(modifier = Modifier.height(12.dp))
-
             ContadorViajeros(
                 etiqueta = "Niños",
-                detalle = "Pagan el 50 %",
+                detalle = "Pagan el 50%",
                 cantidad = ninos,
                 minimo = 0,
                 maximo = 10,
@@ -200,9 +192,7 @@ fun ReservarScreen(
                 onMas = { ninos++ }
             )
 
-            // ---- Plan ----
             TituloSeccion("Plan")
-
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 for (opcion in Plan.entries) {
                     CategoriaChip(
@@ -219,9 +209,7 @@ fun ReservarScreen(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
 
-            // ---- Resumen ----
             TituloSeccion("Resumen")
-
             Card(
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -236,13 +224,13 @@ fun ReservarScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     if (cotizacion.descuento > 0) {
                         FilaResumen(
-                            etiqueta = "Descuento de grupo (10 %)",
-                            valor = "−" + formatoPrecio(cotizacion.descuento),
+                            etiqueta = "Descuento de grupo (10%)",
+                            valor = "-" + formatoPrecio(cotizacion.descuento),
                             colorValor = VerdeMontana
                         )
                     } else {
                         Text(
-                            text = "Con 4 o más viajeros obtienes 10 % de descuento.",
+                            text = "Con 4 o más viajeros obtienes 10% de descuento.",
                             fontSize = 13.sp,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                         )
@@ -258,7 +246,6 @@ fun ReservarScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-
             Button(
                 onClick = {
                     onConfirmar(
@@ -287,7 +274,6 @@ fun ReservarScreen(
                     fontWeight = FontWeight.SemiBold
                 )
             }
-
             if (!formularioValido) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -296,111 +282,8 @@ fun ReservarScreen(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
-
             Spacer(modifier = Modifier.height(16.dp))
         }
-    }
-}
-
-@Composable
-private fun TituloSeccion(texto: String) {
-    Text(
-        text = texto,
-        color = AzulOceano,
-        style = MaterialTheme.typography.titleLarge,
-        fontWeight = FontWeight.Bold,
-        modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
-    )
-}
-
-@Composable
-private fun coloresCampo() = OutlinedTextFieldDefaults.colors(
-    focusedContainerColor = Color.White,
-    unfocusedContainerColor = Color.White,
-    focusedBorderColor = Turquesa,
-    unfocusedBorderColor = Color(0xFFE0D6C6)
-)
-
-@Composable
-private fun ContadorViajeros(
-    etiqueta: String,
-    detalle: String,
-    cantidad: Int,
-    minimo: Int,
-    maximo: Int,
-    onMenos: () -> Unit,
-    onMas: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column {
-            Text(text = etiqueta, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
-            Text(
-                text = detalle,
-                fontSize = 13.sp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            BotonRedondo(simbolo = "−", habilitado = cantidad > minimo, onClick = onMenos)
-            Text(text = cantidad.toString(), fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            BotonRedondo(simbolo = "+", habilitado = cantidad < maximo, onClick = onMas)
-        }
-    }
-}
-
-@Composable
-private fun BotonRedondo(simbolo: String, habilitado: Boolean, onClick: () -> Unit) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .size(36.dp)
-            .clip(CircleShape)
-            .background(if (habilitado) AzulOceano else Color(0xFFD5D0C8))
-            .clickable(enabled = habilitado) { onClick() }
-    ) {
-        Text(
-            text = simbolo,
-            color = Color.White,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-private fun FilaResumen(
-    etiqueta: String,
-    valor: String,
-    colorValor: Color = Color.Unspecified,
-    destacado: Boolean = false
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = etiqueta,
-            fontSize = if (destacado) 18.sp else 14.sp,
-            fontWeight = if (destacado) FontWeight.Bold else FontWeight.Normal
-        )
-        Text(
-            text = valor,
-            color = if (colorValor == Color.Unspecified) {
-                MaterialTheme.colorScheme.onSurface
-            } else {
-                colorValor
-            },
-            fontSize = if (destacado) 22.sp else 14.sp,
-            fontWeight = if (destacado) FontWeight.ExtraBold else FontWeight.SemiBold
-        )
     }
 }
 

@@ -19,19 +19,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.aterrizar_app.Categoria
-import com.example.aterrizar_app.destinos
+import com.example.aterrizar_app.data.destinos
+import com.example.aterrizar_app.model.Categoria
 import com.example.aterrizar_app.ui.components.Buscador
 import com.example.aterrizar_app.ui.components.CategoriasRow
 import com.example.aterrizar_app.ui.components.DestinoCard
 import com.example.aterrizar_app.ui.components.Header
 import com.example.aterrizar_app.ui.theme.AterrizarAppTheme
 import com.example.aterrizar_app.ui.theme.AzulOceano
-import java.text.Normalizer
-
-// Quita tildes para que "paris" encuentre "París"
-private fun String.sinTildes(): String =
-    Normalizer.normalize(this, Normalizer.Form.NFD).replace(Regex("\\p{M}"), "")
+import com.example.aterrizar_app.util.sinTildes
 
 @Composable
 fun InicioScreen(
@@ -44,11 +40,9 @@ fun InicioScreen(
 
     val consulta = texto.trim().sinTildes()
     val destinosFiltrados = destinos.filter { destino ->
-        val coincideTexto =
-            destino.nombre.sinTildes().contains(consulta, ignoreCase = true) ||
-                    destino.pais.sinTildes().contains(consulta, ignoreCase = true)
-        val coincideCategoria =
-            categoriaSeleccionada == null || destino.categoria == categoriaSeleccionada
+        val coincideTexto = destino.nombre.sinTildes().contains(consulta, ignoreCase = true) ||
+                destino.pais.sinTildes().contains(consulta, ignoreCase = true)
+        val coincideCategoria = categoriaSeleccionada == null || destino.categoria == categoriaSeleccionada
         coincideTexto && coincideCategoria
     }
 
@@ -58,16 +52,13 @@ fun InicioScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item { Header() }
-
         item { Buscador(texto = texto, onTextoChange = { texto = it }) }
-
         item {
             CategoriasRow(
                 seleccionada = categoriaSeleccionada,
                 onSeleccion = { categoriaSeleccionada = it }
             )
         }
-
         item {
             Text(
                 text = "Destinos destacados",
@@ -81,7 +72,7 @@ fun InicioScreen(
         if (destinosFiltrados.isEmpty()) {
             item {
                 Text(
-                    text = "No encontramos destinos con esa búsqueda 😕",
+                    text = "No encontramos destinos con esa búsqueda",
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     modifier = Modifier
