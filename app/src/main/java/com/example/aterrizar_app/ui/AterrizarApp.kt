@@ -4,9 +4,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -17,21 +17,23 @@ import com.example.aterrizar_app.ui.viewmodel.AterrizarViewModel
 
 @Composable
 fun AterrizarApp(
-    viewModel: AterrizarViewModel = viewModel()
+    viewModel: AterrizarViewModel
 ) {
     val navController = rememberNavController()
     val entradaActual by navController.currentBackStackEntryAsState()
     val rutaActual = entradaActual?.destination?.route
 
+    val favoritos by viewModel.favoritos.collectAsState()
+    val reservas by viewModel.reservas.collectAsState()
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            // La barra inferior se oculta en la pantalla de reserva
             if (rutaActual != Rutas.RESERVAR) {
                 BarraInferior(
                     rutaActual = rutaActual,
-                    cantidadFavoritos = viewModel.favoritos.size,
-                    cantidadReservas = viewModel.reservas.size,
+                    cantidadFavoritos = favoritos.size,
+                    cantidadReservas = reservas.size,
                     onNavegar = { ruta ->
                         navController.navigate(ruta) {
                             popUpTo(navController.graph.findStartDestination().id) {
@@ -47,8 +49,8 @@ fun AterrizarApp(
     ) { innerPadding ->
         AterrizarNavHost(
             navController = navController,
-            favoritos = viewModel.favoritos,
-            reservas = viewModel.reservas,
+            favoritos = favoritos,
+            reservas = reservas,
             onAlternarFavorito = { id -> viewModel.alternarFavorito(id) },
             onCancelarReserva = { id -> viewModel.cancelarReserva(id) },
             onConfirmarReserva = { destino, nombre, correo, adultos, ninos, plan, total ->
