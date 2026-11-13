@@ -2,6 +2,7 @@ package com.example.aterrizar_app.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -37,6 +39,8 @@ import com.example.aterrizar_app.util.textoViajeros
 @Composable
 fun ReservaCard(
     reserva: Reserva,
+    onVerDetalleClick: () -> Unit = {},
+    onEditarClick: () -> Unit = {},
     onCancelarClick: () -> Unit
 ) {
     Card(
@@ -78,7 +82,16 @@ fun ReservaCard(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            if (reserva.fechaViaje.isNotBlank()) {
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "🗓️ Fecha de salida: ${reserva.fechaViaje}",
+                    color = AzulOceano,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = "👤 Titular: ${reserva.nombre}",
                 fontSize = 14.sp,
@@ -95,6 +108,14 @@ fun ReservaCard(
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
             )
+            if (reserva.notas.isNotBlank()) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = "📝 ${reserva.notas}",
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = formatoPrecio(reserva.total),
@@ -103,14 +124,37 @@ fun ReservaCard(
                 fontWeight = FontWeight.ExtraBold
             )
             Spacer(modifier = Modifier.height(12.dp))
-            OutlinedButton(
-                onClick = onCancelarClick,
-                border = BorderStroke(1.dp, RojoCancelar),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = RojoCancelar),
+            Button(
+                onClick = onVerDetalleClick,
+                colors = ButtonDefaults.buttonColors(containerColor = Turquesa),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Cancelar reserva")
+                Text("📋 Checklist y detalle")
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                OutlinedButton(
+                    onClick = onEditarClick,
+                    border = BorderStroke(1.dp, AzulOceano),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = AzulOceano),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Editar")
+                }
+                OutlinedButton(
+                    onClick = onCancelarClick,
+                    border = BorderStroke(1.dp, RojoCancelar),
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = RojoCancelar),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Cancelar")
+                }
             }
         }
     }

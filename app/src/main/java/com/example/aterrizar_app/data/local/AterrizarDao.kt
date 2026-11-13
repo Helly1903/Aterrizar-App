@@ -5,11 +5,13 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AterrizarDao {
 
+    // --- Favoritos ---
     @Query("SELECT * FROM favoritos")
     fun observeFavoritos(): Flow<List<FavoritoEntity>>
 
@@ -22,6 +24,7 @@ interface AterrizarDao {
     @Delete
     suspend fun deleteFavorito(favorito: FavoritoEntity)
 
+    // --- Reservas (CRUD completo) ---
     @Query("SELECT * FROM reservas ORDER BY id DESC")
     fun observeReservas(): Flow<List<ReservaEntity>>
 
@@ -31,6 +34,22 @@ interface AterrizarDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReserva(reserva: ReservaEntity)
 
+    @Update
+    suspend fun updateReserva(reserva: ReservaEntity)
+
     @Delete
     suspend fun deleteReserva(reserva: ReservaEntity)
+
+    // --- Checklist por Reserva (Entidad relacionada) ---
+    @Query("SELECT * FROM checklist_items WHERE reservaId = :reservaId ORDER BY id ASC")
+    fun observeChecklistPorReserva(reservaId: Int): Flow<List<ChecklistItemEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertChecklistItem(item: ChecklistItemEntity)
+
+    @Update
+    suspend fun updateChecklistItem(item: ChecklistItemEntity)
+
+    @Delete
+    suspend fun deleteChecklistItem(item: ChecklistItemEntity)
 }

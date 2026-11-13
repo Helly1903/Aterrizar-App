@@ -2,8 +2,10 @@ package com.example.aterrizar_app.data.repository
 
 import com.example.aterrizar_app.data.destinos
 import com.example.aterrizar_app.data.local.AterrizarDao
+import com.example.aterrizar_app.data.local.ChecklistItemEntity
 import com.example.aterrizar_app.data.local.FavoritoEntity
 import com.example.aterrizar_app.data.local.ReservaEntity
+import com.example.aterrizar_app.model.ChecklistItem
 import com.example.aterrizar_app.model.Destino
 import com.example.aterrizar_app.model.Plan
 import com.example.aterrizar_app.model.Reserva
@@ -38,7 +40,9 @@ class AterrizarRepository(
         adultos: Int,
         ninos: Int,
         plan: Plan,
-        total: Int
+        total: Int,
+        fechaViaje: String = "",
+        notas: String = ""
     ) {
         val entity = ReservaEntity(
             destinoId = destino.id,
@@ -47,14 +51,80 @@ class AterrizarRepository(
             adultos = adultos,
             ninos = ninos,
             plan = plan.name,
-            total = total
+            total = total,
+            fechaViaje = fechaViaje,
+            notas = notas
         )
         dao.insertReserva(entity)
+    }
+
+    suspend fun actualizarReserva(
+        reservaId: Int,
+        destinoId: Int,
+        nombre: String,
+        correo: String,
+        adultos: Int,
+        ninos: Int,
+        plan: Plan,
+        total: Int,
+        fechaViaje: String,
+        notas: String
+    ) {
+        val entity = ReservaEntity(
+            id = reservaId,
+            destinoId = destinoId,
+            nombre = nombre,
+            correo = correo,
+            adultos = adultos,
+            ninos = ninos,
+            plan = plan.name,
+            total = total,
+            fechaViaje = fechaViaje,
+            notas = notas
+        )
+        dao.updateReserva(entity)
     }
 
     suspend fun cancelarReserva(reservaId: Int) {
         val existente = dao.findReservaById(reservaId) ?: return
         dao.deleteReserva(existente)
+    }
+
+    fun observarChecklist(reservaId: Int): Flow<List<ChecklistItem>> =
+        dao.observeChecklistPorReserva(reservaId).map { lista ->
+            lista.map { it.toModel() }
+        }
+
+    suspend fun agregarChecklistItem(reservaId: Int, titulo: String) {
+        dao.insertChecklistItem(
+            ChecklistItemEntity(
+                reservaId = reservaId,
+                titulo = titulo.trim(),
+                completado = false
+            )
+        )
+    }
+
+    suspend fun alternarChecklistItem(item: ChecklistItem) {
+        dao.updateChecklistItem(
+            ChecklistItemEntity(
+                id = item.id,
+                reservaId = item.reservaId,
+                titulo = item.titulo,
+                completado = !item.completado
+            )
+        )
+    }
+
+    suspend fun eliminarChecklistItem(item: ChecklistItem) {
+        dao.deleteChecklistItem(
+            ChecklistItemEntity(
+                id = item.id,
+                reservaId = item.reservaId,
+                titulo = item.titulo,
+                completado = item.completado
+            )
+        )
     }
 }
 
@@ -69,6 +139,15 @@ private fun ReservaEntity.toModel(): Reserva? {
         adultos = adultos,
         ninos = ninos,
         plan = planEncontrado,
-        total = total
+        total = total,
+        fechaViaje = fechaViaje,
+        notas = notas
     )
 }
+
+private fun ChecklistItemEntity.toModel(): ChecklistItem = ChecklistItem(
+    id = id,
+    reservaId = reservaId,
+    titulo = titulo,
+    completado = completado
+)

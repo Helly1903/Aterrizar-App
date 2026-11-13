@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.aterrizar_app.data.repository.AterrizarRepository
+import com.example.aterrizar_app.model.ChecklistItem
 import com.example.aterrizar_app.model.Destino
 import com.example.aterrizar_app.model.Plan
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -39,16 +41,78 @@ class AterrizarViewModel(
         adultos: Int,
         ninos: Int,
         plan: Plan,
-        total: Int
+        total: Int,
+        fechaViaje: String = "",
+        notas: String = ""
     ) {
         viewModelScope.launch {
-            repository.confirmarReserva(destino, nombre, correo, adultos, ninos, plan, total)
+            repository.confirmarReserva(
+                destino = destino,
+                nombre = nombre,
+                correo = correo,
+                adultos = adultos,
+                ninos = ninos,
+                plan = plan,
+                total = total,
+                fechaViaje = fechaViaje,
+                notas = notas
+            )
+        }
+    }
+
+    fun actualizarReserva(
+        reservaId: Int,
+        destinoId: Int,
+        nombre: String,
+        correo: String,
+        adultos: Int,
+        ninos: Int,
+        plan: Plan,
+        total: Int,
+        fechaViaje: String,
+        notas: String
+    ) {
+        viewModelScope.launch {
+            repository.actualizarReserva(
+                reservaId = reservaId,
+                destinoId = destinoId,
+                nombre = nombre,
+                correo = correo,
+                adultos = adultos,
+                ninos = ninos,
+                plan = plan,
+                total = total,
+                fechaViaje = fechaViaje,
+                notas = notas
+            )
         }
     }
 
     fun cancelarReserva(reservaId: Int) {
         viewModelScope.launch {
             repository.cancelarReserva(reservaId)
+        }
+    }
+
+    fun observarChecklist(reservaId: Int): Flow<List<ChecklistItem>> =
+        repository.observarChecklist(reservaId)
+
+    fun agregarChecklistItem(reservaId: Int, titulo: String) {
+        if (titulo.isBlank()) return
+        viewModelScope.launch {
+            repository.agregarChecklistItem(reservaId, titulo)
+        }
+    }
+
+    fun alternarChecklistItem(item: ChecklistItem) {
+        viewModelScope.launch {
+            repository.alternarChecklistItem(item)
+        }
+    }
+
+    fun eliminarChecklistItem(item: ChecklistItem) {
+        viewModelScope.launch {
+            repository.eliminarChecklistItem(item)
         }
     }
 }

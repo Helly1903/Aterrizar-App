@@ -6,8 +6,12 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [FavoritoEntity::class, ReservaEntity::class],
-    version = 1,
+    entities = [
+        FavoritoEntity::class,
+        ReservaEntity::class,
+        ChecklistItemEntity::class
+    ],
+    version = 3,
     exportSchema = false
 )
 abstract class AterrizarDatabase : RoomDatabase() {
@@ -25,6 +29,7 @@ abstract class AterrizarDatabase : RoomDatabase() {
                     AterrizarDatabase::class.java,
                     "aterrizar_database"
                 )
+                    .fallbackToDestructiveMigration(dropAllTables = true)
                     .build()
                     .also { INSTANCE = it }
             }

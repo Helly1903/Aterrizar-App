@@ -26,10 +26,14 @@ fun AterrizarApp(
     val favoritos by viewModel.favoritos.collectAsState()
     val reservas by viewModel.reservas.collectAsState()
 
+    val ocultarBarra = rutaActual == Rutas.RESERVAR ||
+            rutaActual == Rutas.EDITAR_RESERVA ||
+            rutaActual == Rutas.DETALLE_VIAJE
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            if (rutaActual != Rutas.RESERVAR) {
+            if (!ocultarBarra) {
                 BarraInferior(
                     rutaActual = rutaActual,
                     cantidadFavoritos = favoritos.size,
@@ -51,9 +55,10 @@ fun AterrizarApp(
             navController = navController,
             favoritos = favoritos,
             reservas = reservas,
+            observarChecklist = { reservaId -> viewModel.observarChecklist(reservaId) },
             onAlternarFavorito = { id -> viewModel.alternarFavorito(id) },
             onCancelarReserva = { id -> viewModel.cancelarReserva(id) },
-            onConfirmarReserva = { destino, nombre, correo, adultos, ninos, plan, total ->
+            onConfirmarReserva = { destino, nombre, correo, adultos, ninos, plan, total, fechaViaje, notas ->
                 viewModel.confirmarReserva(
                     destino = destino,
                     nombre = nombre,
@@ -61,8 +66,33 @@ fun AterrizarApp(
                     adultos = adultos,
                     ninos = ninos,
                     plan = plan,
-                    total = total
+                    total = total,
+                    fechaViaje = fechaViaje,
+                    notas = notas
                 )
+            },
+            onActualizarReserva = { reservaId, destinoId, nombre, correo, adultos, ninos, plan, total, fechaViaje, notas ->
+                viewModel.actualizarReserva(
+                    reservaId = reservaId,
+                    destinoId = destinoId,
+                    nombre = nombre,
+                    correo = correo,
+                    adultos = adultos,
+                    ninos = ninos,
+                    plan = plan,
+                    total = total,
+                    fechaViaje = fechaViaje,
+                    notas = notas
+                )
+            },
+            onAgregarChecklistItem = { reservaId, titulo ->
+                viewModel.agregarChecklistItem(reservaId, titulo)
+            },
+            onAlternarChecklistItem = { item ->
+                viewModel.alternarChecklistItem(item)
+            },
+            onEliminarChecklistItem = { item ->
+                viewModel.eliminarChecklistItem(item)
             },
             modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding())
         )

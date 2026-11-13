@@ -50,6 +50,7 @@ import com.example.aterrizar_app.model.Plan
 import com.example.aterrizar_app.ui.components.CategoriaChip
 import com.example.aterrizar_app.ui.components.ContadorViajeros
 import com.example.aterrizar_app.ui.components.FilaResumen
+import com.example.aterrizar_app.ui.components.SelectorFechaViaje
 import com.example.aterrizar_app.ui.components.TituloSeccion
 import com.example.aterrizar_app.ui.components.coloresCampo
 import com.example.aterrizar_app.ui.theme.AterrizarAppTheme
@@ -66,17 +67,20 @@ private val correoRegex = Regex("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")
 fun ReservarScreen(
     destino: Destino,
     onVolver: () -> Unit,
-    onConfirmar: (String, String, Int, Int, Plan, Int) -> Unit
+    onConfirmar: (String, String, Int, Int, Plan, Int, String, String) -> Unit
 ) {
     var nombre by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
+    var fechaViaje by remember { mutableStateOf("") }
     var adultos by remember { mutableIntStateOf(1) }
     var ninos by remember { mutableIntStateOf(0) }
     var plan by remember { mutableStateOf(Plan.BASICO) }
+    var notas by remember { mutableStateOf("") }
 
     val nombreValido = nombre.trim().length >= 3
     val correoValido = correoRegex.matches(correo.trim())
-    val formularioValido = nombreValido && correoValido
+    val fechaValida = fechaViaje.isNotBlank()
+    val formularioValido = nombreValido && correoValido && fechaValida
 
     val cotizacion = calcularCotizacion(destino, plan, adultos, ninos)
 
@@ -171,6 +175,12 @@ fun ReservarScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            TituloSeccion("Fecha del viaje")
+            SelectorFechaViaje(
+                fechaSeleccionada = fechaViaje,
+                onFechaSeleccionada = { fechaViaje = it }
+            )
+
             TituloSeccion("Viajeros")
             ContadorViajeros(
                 etiqueta = "Adultos",
@@ -207,6 +217,17 @@ fun ReservarScreen(
                 text = "Precio base × ${plan.multiplicador}",
                 fontSize = 13.sp,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+
+            TituloSeccion("Notas especiales (opcional)")
+            OutlinedTextField(
+                value = notas,
+                onValueChange = { notas = it },
+                label = { Text("Ej. Equipaje extra, habitación doble, dieta") },
+                maxLines = 3,
+                shape = RoundedCornerShape(16.dp),
+                colors = coloresCampo(),
+                modifier = Modifier.fillMaxWidth()
             )
 
             TituloSeccion("Resumen")
@@ -254,7 +275,9 @@ fun ReservarScreen(
                         adultos,
                         ninos,
                         plan,
-                        cotizacion.total
+                        cotizacion.total,
+                        fechaViaje,
+                        notas.trim()
                     )
                 },
                 enabled = formularioValido,
@@ -277,7 +300,7 @@ fun ReservarScreen(
             if (!formularioValido) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Completa tu nombre y correo para confirmar.",
+                    text = "Completa tu nombre, correo y fecha de viaje para confirmar.",
                     fontSize = 13.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
@@ -294,7 +317,7 @@ fun ReservarScreenPreview() {
         ReservarScreen(
             destino = destinos.first(),
             onVolver = {},
-            onConfirmar = { _, _, _, _, _, _ -> }
+            onConfirmar = { _, _, _, _, _, _, _, _ -> }
         )
     }
 }

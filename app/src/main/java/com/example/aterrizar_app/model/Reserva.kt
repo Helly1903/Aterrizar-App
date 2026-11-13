@@ -9,5 +9,7 @@ data class Reserva(
     val adultos: Int,
     val ninos: Int,
     val plan: Plan,
-    val total: Int
+    val total: Int,
+    val fechaViaje: String = "",
+    val notas: String = ""
 )

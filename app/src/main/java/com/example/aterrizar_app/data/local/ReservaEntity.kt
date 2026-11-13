@@ -13,5 +13,7 @@ data class ReservaEntity(
     val adultos: Int,
     val ninos: Int,
     val plan: String,
-    val total: Int
+    val total: Int,
+    val fechaViaje: String = "",
+    val notas: String = ""
 )
