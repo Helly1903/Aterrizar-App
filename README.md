@@ -88,7 +88,7 @@ La app cuenta con **6 pantallas** conectadas mediante **Navigation Compose** (`N
 
 1. Clona el repositorio:
    ```bash
-   git clone [https://github.com/Helly1903/Aterrizar-App](https://github.com/Helly1903/Aterrizar-App)
+   git clone https://github.com/Helly1903/Aterrizar-App.git
    ```
 2. Abre Android Studio, selecciona **File → Open** y elige la carpeta del proyecto.
 3. Espera a que finalice la sincronización de **Gradle**.
