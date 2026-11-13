@@ -1,6 +1,6 @@
 # ✈️ Aterrizar CO
 
-App móvil de una agencia de viajes, hecha con **Kotlin** y **Jetpack Compose**.
+App móvil de una agencia de viajes, hecha con **Kotlin**, **Jetpack Compose**, **MVVM** y **Room (SQLite)**.
 
 - **Asignatura:** Desarrollo aplicaciones móviles
 - **Autor:** Santiago Mejia
@@ -21,67 +21,45 @@ Cada paquete muestra:
 
 Que un cliente pueda, desde su celular:
 
-1. Explorar y buscar destinos.
-2. Guardar sus destinos favoritos.
-3. Cotizar un viaje según el plan y el número de viajeros.
-4. Confirmar la reserva y consultarla o cancelarla.
+1. Explorar, buscar y filtrar destinos por categoría.
+2. Guardar sus destinos favoritos de forma persistente en base de datos local.
+3. Cotizar un viaje según la fecha de salida, el plan, el número de viajeros y notas especiales.
+4. Confirmar, consultar, filtrar, editar y cancelar reservas (CRUD completo).
+5. Gestionar un **checklist interactivo** de preparación para cada viaje reservado.
 
-Esta es la primera versión de la app. Usa datos locales: no tiene base de datos, internet ni inicio de sesión.
+Esta versión implementa arquitectura **MVVM** con **Room (SQLite)** y **Kotlin Coroutines / Flow**, por lo que los favoritos, las reservas y las tareas del checklist se conservan al cerrar la app o rotar la pantalla.
 
 ## 3. Pantallas implementadas
 
-La app tiene **4 pantallas** que se conectan con **Navigation Compose** (`NavController` y `NavHost`).
+La app cuenta con **6 pantallas** conectadas mediante **Navigation Compose** (`NavController` y `NavHost`), ocultando la barra inferior en las vistas de detalle y formularios:
 
 | Pantalla | Para qué sirve | Archivo |
 |---|---|---|
-| **Inicio** | Ver los destinos, buscarlos por nombre o país y filtrarlos por categoría | `InicioScreen.kt` |
-| **Favoritos** | Ver los destinos marcados con el corazón | `FavoritosScreen.kt` |
-| **Mis viajes** | Ver las reservas confirmadas y cancelarlas | `MisViajesScreen.kt` |
-| **Reservar** | Llenar los datos del titular, elegir viajeros y plan, y ver el total | `ReservarScreen.kt` |
+| **Inicio** | Explorar los destinos, buscarlos sin tildes por nombre o país y filtrarlos por categoría | `InicioScreen.kt` |
+| **Favoritos** | Ver y gestionar los destinos guardados con el corazón | `FavoritosScreen.kt` |
+| **Mis viajes** | Ver estadísticas globales, buscar/filtrar reservas por plan, editarlas o cancelarlas | `MisViajesScreen.kt` |
+| **Reservar** | Ingresar datos del titular, elegir fecha en calendario, viajeros, plan, notas y cotizar | `ReservarScreen.kt` |
+| **Editar reserva** | Modificar cualquier dato de una reserva existente y recalcular su cotización | `EditarReservaScreen.kt` |
+| **Detalle del viaje** | Consultar toda la información de la reserva y gestionar su checklist de viaje | `DetalleViajeScreen.kt` |
 
-- Inicio, Favoritos y Mis viajes están en la **barra de navegación inferior**.
-- **Reservar** se abre desde el botón *Reservar* de cualquier tarjeta. Recibe el destino elegido por medio de la ruta `reservar/{destinoId}`.
+- **Inicio**, **Favoritos** y **Mis viajes** forman la **barra de navegación inferior** con contadores dinámicos.
+- **Reservar** (`reservar/{destinoId}`), **Editar reserva** (`editar_reserva/{reservaId}`) y **Detalle del viaje** (`detalle_viaje/{reservaId}`) reciben argumentos tipados por ruta.
 
 ## 4. Funcionalidades
 
-La app tiene **3 funcionalidades interactivas**:
-
-| # | Funcionalidad | Origen |
+| # | Funcionalidad | Descripción |
 |---|---|---|
-| 1 | Búsqueda y filtrado de destinos | **Trabajada en clase** |
-| 2 | Favoritos | **Nueva** |
-| 3 | Reservar y cotizar | **Nueva** |
+| 1 | **Búsqueda y filtrado de destinos** | Búsqueda insensible a mayúsculas y tildes (`sinTildes()`) combinable con chips de categoría (*Todos, Playa, Historia, Montaña, Ciudad*). |
+| 2 | **Favoritos persistentes (Room)** | Marcado/desmarcado desde cualquier tarjeta (`🤍` / `❤️`) almacenado en la tabla `favoritos` de SQLite. |
+| 3 | **Cotizador y creación de reservas** | Validación de titular y correo, selector de fecha (`DatePickerDialog` bloqueando fechas pasadas), adultos/niños, planes (*Básico ×1.0, Confort ×1.25, Premium ×1.5*), notas opcionales y cálculo en vivo. |
+| 4 | **Gestión y edición de reservas (CRUD)** | Tarjeta resumen con total de reservas, viajeros, inversión acumulada y próxima salida; búsqueda y filtro por plan; edición completa y cancelación con diálogo de confirmación. |
+| 5 | **Checklist por viaje (Entidad relacionada)** | Lista de tareas vinculada por llave foránea (`CASCADE`) a cada reserva, con barra de progreso, sugerencias rápidas en chips, creación, marcado y eliminación. |
 
-### Funcionalidad 1: Búsqueda y filtrado (trabajada en clase)
+### Reglas de cotización (`Cotizador.kt`)
 
-- Un campo de búsqueda filtra los destinos por **nombre o país**. No importan las mayúsculas ni las tildes: "paris" encuentra "París".
-- Los chips de categoría (*Todos, Playa, Historia, Montaña, Ciudad*) filtran por tipo de destino. Se pueden combinar con la búsqueda.
-- Si no hay resultados, la app muestra un mensaje.
-- **Cómo funciona:** el texto y la categoría seleccionada son estados (`mutableStateOf`). Cada vez que cambian, se recalcula la lista con `filter`.
-- **Archivos:** `InicioScreen.kt` y `Componentes.kt` (`Buscador`, `CategoriasRow`).
-
-### Funcionalidad 2: Favoritos (nueva)
-
-- Cada tarjeta tiene un corazón. Al tocarlo, el destino se marca o se desmarca (🤍 / ❤️).
-- La pantalla **Favoritos** muestra solo los destinos marcados, o un mensaje si no hay ninguno.
-- La barra inferior muestra cuántos favoritos hay, por ejemplo *Favoritos (2)*.
-- **Cómo funciona:** el conjunto de ids de favoritos vive en `AterrizarApp` (estado compartido). Inicio y Favoritos lo reciben, y el corazón avisa con un evento (`onFavoritoClick`).
-- **Archivos:** `MainActivity.kt`, `Componentes.kt` (`DestinoCard`), `FavoritosScreen.kt`.
-
-### Funcionalidad 3: Reservar y cotizar (nueva)
-
-Esta funcionalidad es distinta de Favoritos: tiene formulario con validaciones, cálculo de precios y crea y cancela reservas.
-
-- **Formulario del titular:** nombre (mínimo 3 letras) y correo (formato válido). Los errores aparecen en el campo, y el botón *Confirmar reserva* se mantiene desactivado hasta que los datos sean correctos.
-- **Viajeros:** adultos y niños con botones **+ / −**.
-- **Plan:** Básico (×1.0), Confort (×1.25) o Premium (×1.5).
-- **Reglas de precio:**
-  - Cada niño paga el 50 %.
-  - Desde 4 viajeros hay 10 % de descuento sobre el subtotal.
-- **Resumen en vivo:** subtotal, descuento y total se recalculan con cada cambio.
-  - Ejemplo: Cartagena, plan Premium, 2 adultos y 2 niños → subtotal $8.325.000, descuento −$832.500, **total $7.492.500**.
-- **Mis viajes:** al confirmar, la reserva aparece con sus datos y el total. Se puede cancelar con un diálogo de confirmación. El encabezado muestra el total reservado.
-- **Archivos:** `ReservarScreen.kt`, `MisViajesScreen.kt`, `Destino.kt` (`calcularCotizacion`), `MainActivity.kt`.
+- Cada adulto paga el **100 %** y cada niño el **50 %**.
+- El plan elegido multiplica el valor base: **Básico (×1.0)**, **Confort (×1.25)** o **Premium (×1.5)**.
+- Desde **4 viajeros** en total se aplica automáticamente un **10 % de descuento** sobre el subtotal.
 
 ## 5. Capturas de pantalla
 
@@ -89,70 +67,105 @@ Esta funcionalidad es distinta de Favoritos: tiene formulario con validaciones, 
 |:---:|:---:|:---:|
 | <img src="capturas/01-inicio.png" width="220"> | <img src="capturas/02-busqueda-filtro.png" width="220"> | <img src="capturas/03-favoritos.png" width="220"> |
 
-| Reservar (formulario) | Reservar (resumen con descuento) | Mis viajes |
+| Reservar (datos y fecha) | Reservar (notas y resumen) | Mis viajes y estadísticas |
 |:---:|:---:|:---:|
 | <img src="capturas/04-reservar-formulario.png" width="220"> | <img src="capturas/05-reservar-resumen.png" width="220"> | <img src="capturas/06-mis-viajes.png" width="220"> |
+
+| Filtros en Mis viajes | Editar reserva | Detalle y checklist |
+|:---:|:---:|:---:|
+| <img src="capturas/07-mis-viajes-filtro.png" width="220"> | <img src="capturas/08-editar-reserva.png" width="220"> | <img src="capturas/09-detalle-checklist.png" width="220"> |
 
 ## 6. Cómo ejecutar el proyecto
 
 **Requisitos**
 
-- Android Studio reciente (el proyecto usa Android Gradle Plugin 9.4.1).
-- Android SDK 37 instalado (se instala desde *SDK Manager*).
-- Un emulador o un celular con Android 7.0 (API 24) o superior.
-- Internet solo la primera vez, para que Gradle descargue las dependencias.
+- Android Studio reciente (Android Gradle Plugin **9.4.1**, Kotlin **2.0.21**, KSP).
+- Android SDK **37** instalado desde *SDK Manager* (`minSdk = 24`, `targetSdk = 36`).
+- Un emulador o dispositivo físico con Android 7.0 (API 24) o superior.
+- Conexión a internet la primera vez para descargar dependencias de Gradle.
 
 **Pasos**
 
 1. Clona el repositorio:
+   ```bash
+   git clone [https://github.com/Helly1903/Aterrizar-App](https://github.com/Helly1903/Aterrizar-App)
    ```
-   git clone https://github.com/Helly1903/Aterrizar-App
-   ```
-2. Abre Android Studio y elige **File → Open**. Selecciona la carpeta del proyecto.
-3. Espera a que termine el **Gradle Sync** (barra de progreso abajo).
-4. Elige un emulador o conecta tu celular con la depuración USB activada.
-5. Presiona el botón verde **▶ Run 'app'**.
-
+2. Abre Android Studio, selecciona **File → Open** y elige la carpeta del proyecto.
+3. Espera a que finalice la sincronización de **Gradle**.
+4. Selecciona un emulador o conecta tu dispositivo con depuración USB activada.
+5. Presiona **▶ Run 'app'**.
 
 ## 7. Estructura del proyecto
 
-```
-app/src/main/java/com/example/aterrizar_app/
-├── MainActivity.kt          Punto de entrada, estado compartido y NavHost
-├── Destino.kt               Modelos de datos, lista de destinos y cálculo de la cotización
-└── ui/
-    ├── components/
-    │   ├── Header.kt        Encabezado con logo y avión dibujado en Canvas
-    │   ├── Componentes.kt   Buscador, chips de categoría y tarjeta de destino
-    │   └── EstadoVacio.kt   Mensaje para pantallas sin contenido
-    ├── navigation/
-    │   └── Rutas.kt         Nombres de las rutas y elementos de la barra inferior
-    ├── screens/
-    │   ├── InicioScreen.kt
-    │   ├── FavoritosScreen.kt
-    │   ├── MisViajesScreen.kt
-    │   └── ReservarScreen.kt
-    └── theme/
-        ├── Color.kt         Paleta de colores de la marca
-        ├── Theme.kt         Tema Material 3
-        └── Type.kt          Tipografía
+```text
+Aterrizar-App-master/
+├── capturas/                                    Capturas de pantalla usadas en el README
+└── app/
+    ├── EstadoReserva.kt                         Enum con estados visuales de reserva
+    └── src/main/java/com/example/aterrizar_app/
+        ├── MainActivity.kt                      Punto de entrada, instancia Database, Repository y ViewModel
+        ├── Util/
+        │   ├── Cotizador.kt                     Lógica de cálculo de subtotal, descuento y total
+        │   └── Formato.kt                       Formato de moneda COP, normalización sin tildes y texto de viajeros
+        ├── data/
+        │   ├── DestinosData.kt                  Catálogo inicial de 8 destinos turísticos
+        │   └── local/
+        │       ├── AterrizarDao.kt              Consultas y operaciones CRUD con Flow y suspend
+        │       ├── AterrizarDatabase.kt         Base de datos Room (aterrizar_database, versión 3)
+        │       ├── ChecklistItemEntity.kt       Entidad Room de tareas con ForeignKey a ReservaEntity
+        │       ├── FavoritoEntity.kt            Entidad Room para destinos favoritos
+        │       ├── ReservaEntity.kt             Entidad Room para reservas confirmadas
+        │       └── repository/
+        │           └── AterrizarRepository.kt   Repositorio que mapea entidades Room a modelos de dominio
+        ├── model/
+        │   ├── Categoria.kt                     Enum de categorías con etiqueta y color
+        │   ├── ChecklistItem.kt                 Modelo de dominio para ítems del checklist
+        │   ├── Cotizacion.kt                    Modelo con subtotal, descuento y total
+        │   ├── Destino.kt                       Modelo de paquete turístico
+        │   ├── Plan.kt                          Enum de planes (Básico, Confort, Premium)
+        │   └── Reserva.kt                       Modelo de dominio de reserva confirmada
+        └── ui/
+            ├── AterrizarApp.kt                  Scaffold raíz, estado reactivo y control de barra inferior
+            ├── components/
+            │   ├── Buscador.kt                  Campo de búsqueda estilizado
+            │   ├── CamposTexto.kt               Colores compartidos para OutlinedTextField
+            │   ├── CategoriaChip.kt             Chips seleccionables y fila horizontal de categorías
+            │   ├── ContadorViajeros.kt          Selector numérico con botones + y −
+            │   ├── DestinoCard.kt               Tarjeta de destino con imagen, badge y botón de favorito
+            │   ├── EstadisticasViajesCard.kt    Tarjeta resumen con métricas y próxima fecha de salida
+            │   ├── EstadoVacio.kt               Vista informativa para listas vacías
+            │   ├── FilaResumen.kt               Fila clave-valor para desgloses de cotización y detalle
+            │   ├── Header.kt                    Encabezado con degradado, fuente Fredoka y avión en Canvas
+            │   ├── ReservarCard.kt              Tarjeta de reserva con acciones de checklist, editar y cancelar
+            │   ├── SelectorFechaViaje.kt        Campo de fecha integrado con DatePickerDialog de Material 3
+            │   └── TituloSeccion.kt             Encabezado tipográfico de sección
+            ├── navigation/
+            │   ├── AterrizarNavHost.kt          Grafo de navegación con rutas estáticas y con argumentos
+            │   ├── BarraInferior.kt             NavigationBar con contadores de favoritos y viajes
+            │   └── Rutas.kt                     Definición de rutas e ítems de la barra inferior
+            ├── screens/
+            │   ├── DetalleViajeScreen.kt        Detalle completo de reserva y checklist interactivo
+            │   ├── EditarReservaScreen.kt       Formulario de edición de reservas existentes
+            │   ├── FavoritosScreen.kt           Listado de destinos guardados como favoritos
+            │   ├── InicioScreen.kt              Pantalla principal con búsqueda y filtro por categoría
+            │   ├── MisViajesScreen.kt           Gestión de reservas, estadísticas y filtros por plan
+            │   └── ReservarScreen.kt            Formulario de nueva reserva y cotización en vivo
+            ├── theme/
+            │   ├── Color.kt                     Paleta de colores de la marca
+            │   ├── Theme.kt                     Esquema de color Material 3
+            │   └── Type.kt                      Configuración tipográfica
+            └── viewmodel/
+                └── AterrizarViewModel.kt        ViewModel y Factory con StateFlow para la UI
 ```
 
-## 8. Conceptos de Jetpack Compose aplicados
+## 8. Tecnologías y conceptos aplicados
 
-| Concepto | Dónde se usa |
+| Concepto / Tecnología | Dónde se usa |
 |---|---|
-| `Column`, `Row`, `Box` | Todas las pantallas. `Box` pone el badge y el corazón sobre la foto |
-| `LazyColumn` | Listas de Inicio, Favoritos y Mis viajes |
-| `LazyRow` | Chips de categoría |
-| Data class y colección | `Destino` y la lista `destinos` (8 elementos) |
-| Composables reutilizables | `DestinoCard`, `CategoriaChip`, `EstadoVacio`, `ReservaCard` |
-| Estado y eventos | `remember` + `mutableStateOf`, con eventos que suben por lambdas |
-| Navigation Compose | `NavController`, `NavHost`, `composable`, ruta con argumento |
-| Material 3 | `Scaffold`, `NavigationBar`, `Card`, `Button`, `OutlinedTextField`, `AlertDialog` |
-
-## 9. Alcance de esta versión
-
-Según el alcance del primer corte, la app **no incluye** base de datos, conexión a API, autenticación, persistencia de información, MVVM ni ViewModel.
-
-Por eso, al cerrar la app o girar la pantalla, los favoritos y las reservas se reinician.
+| **Arquitectura MVVM** | `AterrizarViewModel`, `AterrizarViewModelFactory` y `AterrizarRepository` desacoplan la UI de los datos |
+| **Room SQLite + KSP** | `AterrizarDatabase` con 3 entidades (`FavoritoEntity`, `ReservaEntity`, `ChecklistItemEntity`) y relación `ForeignKey` (`CASCADE`) |
+| **Kotlin Coroutines & Flow** | `Flow` en DAO/Repository recolectados como `StateFlow` mediante `stateIn` y `collectAsState()` |
+| **Navigation Compose** | `NavHost`, `NavController`, barra inferior condicional y rutas con argumentos (`destinoId`, `reservaId`) |
+| **Layouts y listas Compose** | `Scaffold`, `Column`, `Row`, `Box`, `LazyColumn`, `LazyRow` y `verticalScroll` |
+| **Material 3** | `DatePickerDialog`, `LinearProgressIndicator`, `Checkbox`, `NavigationBar`, `Card`, `OutlinedTextField`, `AlertDialog` |
+| **Canvas personalizado** | `Header.kt` dibuja la trayectoria punteada y el avión de la marca |
